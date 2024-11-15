@@ -4,14 +4,13 @@ declare(strict_types = 1);
 
 namespace jojoe77777\FormAPI;
 
-use InvalidArgumentException;
 use pocketmine\form\Form as IForm;
 use pocketmine\player\Player;
 
 abstract class Form implements IForm{
 
     /** @var array */
-    protected array $data = [];
+    protected $data = [];
     /** @var callable|null */
     private $callable;
 
