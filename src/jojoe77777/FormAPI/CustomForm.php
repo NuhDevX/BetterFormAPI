@@ -4,12 +4,9 @@ declare(strict_types = 1);
 
 namespace jojoe77777\FormAPI;
 
-use pocketmine\form\FormValidationException;
-
 class CustomForm extends Form {
 
-    private array $labelMap = [];
-    private array $validationMethods = [];
+    private $labelMap = [];
 
     /**
      * @param callable|null $callable
@@ -22,22 +19,9 @@ class CustomForm extends Form {
     }
 
     public function processData(&$data) : void {
-        if($data !== null && !is_array($data)) {
-            throw new FormValidationException("Expected an array response, got " . gettype($data));
-        }
         if(is_array($data)) {
-            if(count($data) !== count($this->validationMethods)) {
-                throw new FormValidationException("Expected an array response with the size " . count($this->validationMethods) . ", got " . count($data));
-            }
             $new = [];
-            foreach($data as $i => $v) {
-                $validationMethod = $this->validationMethods[$i] ?? null;
-                if($validationMethod === null) {
-                    throw new FormValidationException("Invalid element " . $i);
-                }
-                if(!$validationMethod($v)) {
-                    throw new FormValidationException("Invalid type given for element " . $this->labelMap[$i]);
-                }
+            foreach($data as $i => $v) {              
                 $new[$this->labelMap[$i]] = $v;
             }
             $data = $new;
@@ -48,9 +32,8 @@ class CustomForm extends Form {
      * @param string $title
      * @return $this
      */
-    public function setTitle(string $title) : self {
+    public function setTitle(string $title) : void {
         $this->data["title"] = $title;
-        return $this;
     }
 
     /**
@@ -65,11 +48,9 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addLabel(string $text, ?string $label = null) : self {
+    public function addLabel(string $text, ?string $label = null) : void {
         $this->addContent(["type" => "label", "text" => $text]);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => $v === null;
-        return $this;
     }
 
     /**
@@ -78,15 +59,13 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addToggle(string $text, bool $default = null, ?string $label = null) : self {
+    public function addToggle(string $text, bool $default = null, ?string $label = null) : void {
         $content = ["type" => "toggle", "text" => $text];
         if($default !== null) {
             $content["default"] = $default;
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => is_bool($v);
-        return $this;
     }
 
     /**
@@ -98,7 +77,7 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addSlider(string $text, int $min, int $max, int $step = -1, int $default = -1, ?string $label = null) : self {
+    public function addSlider(string $text, int $min, int $max, int $step = -1, int $default = -1, ?string $label = null) : void {
         $content = ["type" => "slider", "text" => $text, "min" => $min, "max" => $max];
         if($step !== -1) {
             $content["step"] = $step;
@@ -108,8 +87,6 @@ class CustomForm extends Form {
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => (is_float($v) || is_int($v)) && $v >= $min && $v <= $max;
-        return $this;
     }
 
     /**
@@ -119,15 +96,13 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addStepSlider(string $text, array $steps, int $defaultIndex = -1, ?string $label = null) : self {
+    public function addStepSlider(string $text, array $steps, int $defaultIndex = -1, ?string $label = null) : void {
         $content = ["type" => "step_slider", "text" => $text, "steps" => $steps];
         if($defaultIndex !== -1) {
             $content["default"] = $defaultIndex;
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => is_int($v) && isset($steps[$v]);
-        return $this;
     }
 
     /**
@@ -137,11 +112,9 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addDropdown(string $text, array $options, int $default = null, ?string $label = null) : self {
+    public function addDropdown(string $text, array $options, int $default = null, ?string $label = null) : void {
         $this->addContent(["type" => "dropdown", "text" => $text, "options" => $options, "default" => $default]);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => is_int($v) && isset($options[$v]);
-        return $this;
     }
 
     /**
@@ -151,20 +124,17 @@ class CustomForm extends Form {
      * @param string|null $label
      * @return $this
      */
-    public function addInput(string $text, string $placeholder = "", string $default = null, ?string $label = null) : self {
+    public function addInput(string $text, string $placeholder = "", string $default = null, ?string $label = null) : void {
         $this->addContent(["type" => "input", "text" => $text, "placeholder" => $placeholder, "default" => $default]);
         $this->labelMap[] = $label ?? count($this->labelMap);
-        $this->validationMethods[] = static fn($v) => is_string($v);
-        return $this;
     }
 
     /**
      * @param array $content
      * @return $this
      */
-    private function addContent(array $content) : self {
+    private function addContent(array $content) : void {
         $this->data["content"][] = $content;
-        return $this;
     }
 
 }
