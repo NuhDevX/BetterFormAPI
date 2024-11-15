@@ -27,7 +27,6 @@ class ModalForm extends Form {
      */
     public function setTitle(string $title) : void {
         $this->data["title"] = $title;
-        return $this;
     }
 
     /**
